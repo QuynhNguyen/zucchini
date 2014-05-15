@@ -113,13 +113,15 @@ class Zucchini::Feature
     end
   end
 
-  def approve(reference_type)
+  def approve(reference_type, failed_option=false)
     raise "Directory #{path} doesn't contain previous run data" unless File.exists?("#{run_data_path}/Run\ 1")
 
-    screenshots(false).each do |s|
-      reference_file_path = "#{File.dirname(s.file_path)}/../../#{reference_type}/#{device[:screen]}/#{s.file_name}"
-      FileUtils.mkdir_p File.dirname(reference_file_path)
-      @succeeded = FileUtils.copy_file(s.file_path, reference_file_path)
+    screenshots(failed_option).each do |s|
+      if !failed_option || s.diff[0] == :failed
+        reference_file_path = "#{File.dirname(s.file_path)}/../../#{reference_type}/#{device[:screen]}/#{s.file_name}"
+        FileUtils.mkdir_p File.dirname(reference_file_path)
+        @succeeded = FileUtils.copy_file(s.file_path, reference_file_path)
+      end
     end
   end
 end
